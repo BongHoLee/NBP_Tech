@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="grade">
+	<select id="checkMember" resultType="Map" parameterType="Map" timeout="10">
+		SELECT * FROM NB60344_GRADE
+		WHERE RESTAURANT_ID = #{RESTAURANT_ID}
+		AND MEMBER_KEY = #{MEMBER_KEY}
+
+	</select>
+	
+	<select id="gradeList" resultType="Map" parameterType="Map" timeout="10">
+		SELECT 
+			MEMBER_KEY
+		  , RESTAURANT_ID
+		  , GRADE_ID
+		  , GRADE
+		FROM NB60344_GRADE
+		WHERE 1=1 
+		AND MEMBER_KEY=#{MEMBER_KEY}
+	</select>
+	
+		<insert id="insert" parameterType="Map">
+
+		INSERT INTO NB60344_GRADE
+		(
+			GRADE_ID
+		  , MEMBER_KEY
+		  , RESTAURANT_ID
+		  , GRADE
+		)
+		VALUES
+		(
+			GRADE_SEQ.nextval
+		  , #{MEMBER_KEY}
+		  , #{RESTAURANT_ID}
+		  , #{STAR-POINT}
+		)
+	</insert>
+	
+	<update id="update" parameterType="Map">
+		UPDATE NB60344_GRADE SET GRADE=#{STAR-POINT} WHERE RESTAURANT_ID=#{RESTAURANT_ID} AND MEMBER_KEY=#{MEMBER_KEY}
+	</update>
+</mapper>

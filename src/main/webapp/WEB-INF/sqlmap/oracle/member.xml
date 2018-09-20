@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="member">
+	<select id="read" resultType="Map" parameterType="Map" timeout="10">
+	SELECT MEMBER_KEY
+		 , MEMBER_ID
+		 , MEMBER_NAME
+		 , AUTHORITY_ID
+		 , MEMBER_PASSWORD
+		 , MEMBER_ADDR
+		 , MEMBER_TEL
+	FROM NB60344_MEMBER
+	WHERE MEMBER_ID = #{MEMBER_ID}
+	</select>
+
+
+
+	
+
+
+
+	<delete id="delete" parameterType="Map">
+	 delete from WFS_MEMBER WHERE EMAIL=#{EMAIL}
+
+	</delete>
+
+</mapper>

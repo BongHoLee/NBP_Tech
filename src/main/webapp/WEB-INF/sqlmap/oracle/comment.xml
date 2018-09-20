@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="comment">
+
+	
+	<!-- 업체의 상세 정보 중 댓글 리스트를 가져옴 -->
+		<select id="Comment" resultType="Map" parameterType="Map" timeout="10">
+			
+			SELECT board.board_id					AS board_id
+				 , board.board_comment				AS board_comment
+				 , mem.member_key					AS member_key
+				 , mem.member_id					AS member_id
+				 , board.update_date				AS update_date
+			FROM NB60344_comment_board board
+			   , NB60344_member mem
+			WHERE board.restaurant_id = #{RESTAURANT_ID}
+			AND	  board.member_key = mem.member_key
+			ORDER BY board.update_date DESC
+
+	</select>
+	
+	<select id="updatedComment" resultType="Map" parameterType="Map" timeout="10">
+			
+	SELECT UPDATE_DATE FROM NB60344_comment_board
+	WHERE BOARD_ID=#{BOARD_ID}
+	</select>
+	
+	<insert id="insert" parameterType="Map">
+
+		INSERT INTO NB60344_COMMENT_BOARD
+		(
+			BOARD_ID
+		  , BOARD_COMMENT
+		  , MEMBER_KEY
+		  , RESTAURANT_ID
+		  , BOARD_DATE
+		  , UPDATE_DATE
+		)
+		VALUES
+		(
+			COMMENT_SEQ.nextval
+		  , #{BOARD_COMMENT}
+		  , #{MEMBER_KEY}
+		  , #{RESTAURANT_ID}
+		  , sysdate
+		  , sysdate
+		)
+	</insert>
+	
+	<delete id="delete" parameterType="Map">
+		DELETE FROM NB60344_COMMENT_BOARD
+		WHERE BOARD_ID = #{BOARD_ID}
+	</delete>
+	
+	<update id="update" parameterType="Map">
+		UPDATE NB60344_Comment_board SET BOARD_COMMENT=#{BOARD_COMMENT}, UPDATE_DATE=sysdate WHERE BOARD_ID=#{BOARD_ID}
+	</update>
+</mapper>

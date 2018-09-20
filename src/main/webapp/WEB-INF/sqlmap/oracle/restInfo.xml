@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="restInfo">
+
+
+
+	<sql id="select-clause">
+		<![CDATA[
+		    SELECT rest.restaurant_id           AS restaurant_id
+		         , rest.restaurant_name         AS restaurant_name
+		         , cate.category_name           AS category_name
+		         , rest.category_id             AS category_id
+		         , rest.order_type              AS order_type
+		         , rest.restaurant_addr         AS restaurant_addr
+             	 , rest.restaurant_tel          AS restaurant_tel
+		         , ROUND(AVG(NVL(grade, 0)), 1)           AS grade
+		         , rest.used					AS used
+		         , rest.restaurant_description 	AS restaurant_description
+		]]>
+	</sql>
+	
+	<sql id="select-from">
+		<![CDATA[
+				    FROM NB60344_grade grade
+			       , NB60344_restaurant rest
+			       , Nb60344_Category cate
+
+			    ]]>
+	</sql>
+	
+	<sql id="select-where">
+				<![CDATA[
+				AND rest.category_id = cate.category_id
+			    AND grade.Restaurant_Id(+) = rest.Restaurant_Id
+			    AND rest.used = 'y'
+			    GROUP BY rest.restaurant_id
+			           , rest.restaurant_name
+			           , cate.category_name
+			           , rest.category_id
+			           , rest.restaurant_addr
+			           , rest.restaurant_tel
+			           , rest.order_type
+			           , rest.used
+			           , rest.restaurant_description
+			    ORDER BY grade DESC
+			      ]]>
+			    
+	 </sql>
+	 
+	<select id="RestList" resultType="Map" parameterType="Map" timeout="10">
+		<include refid="select-clause" />
+		<include refid="select-from" />
+		WHERE 1=1		
+		<include refid="select-where"/>
+	</select>
+	
+	
+	<select id="Rest" resultType="Map" parameterType="Map" timeout="10">
+		<include refid="select-clause" />
+		<include refid="select-from" />
+		 WHERE 1=1
+		 AND rest.restaurant_id=#{RESTAURANT_ID}
+		<include refid="select-where"/>
+			   
+	</select>
+	
+	
+	<!-- 검색 결과에 해당하는 업체 리스트를 가져옴 -->
+	<select id="searchResult" resultType="Map" parameterType="Map">
+		<include refid="select-clause" />
+		<include refid="select-from" />
+			    WHERE 1=1
+			    AND rest.restaurant_id in
+			    <foreach collection="restIdList" item="item" index="index" separator="," open="(" close=")">
+			    	#{item.RESTAURANT_ID}
+			    </foreach>
+			    <include refid="select-where"/>
+	</select> 
+	
+	
+	
+	
+	<!-- 업체의 상세 정보 중 댓글 리스트를 가져옴 -->
+		<select id="CommentList" resultType="Map" parameterType="Map" timeout="10">
+			
+			SELECT board.board_id					AS board_id
+				 , board.board_comment				AS board_comment
+				 , mem.member_key					AS member_key
+				 , mem.member_id					AS member_id
+				 , board.board_date 				AS board_date
+				 , board.update_date				AS update_date
+			FROM NB60344_comment_board board
+			   , NB60344_member mem
+			WHERE board.restaurant_id = #{RESTAURANT_ID}
+			AND	  board.member_key = mem.member_key
+			ORDER BY update_date
+
+	</select>
+	
+	
+	<!-- 업체의 상세 정보 중 해시 리스트를 가져옴 -->
+	<select id="HashList" resultType="Map" parameterType="Map" timeout="10">
+			
+			SELECT restHash.restaurant_id	AS restaurant_id
+				 , restHash.hash_id			AS hash_id
+				 , hash.hash_name			AS hash_name
+			FROM NB60344_restaurant_hashtag restHash
+			   , NB60344_hashtag hash
+			WHERE restHash.restaurant_id = #{RESTAURANT_ID}
+			AND   restHash.hash_id = hash.hash_id
+
+	</select>
+	
+<!-- 업체의 상세 정보 중 메뉴 리스트를 가져옴 -->
+	<select id="MenuList" resultType="Map" parameterType="Map" timeout="10">
+			
+			SELECT menu.menu_id			AS menu_id
+				 , menu.menu_name		AS menu_name
+				 , menu.menu_price		AS menu_price
+				 , menu.menu_description AS menu_description
+			FROM NB60344_menu menu
+			WHERE menu.restaurant_id = #{RESTAURANT_ID}
+
+	</select>
+	
+	
+	<!-- 해시명 검색 조건에 해당하는 업체id 가져옴 -->
+	<select id="searchRestIdForHash" resultType="Map" parameterType="Map" timeout="10">
+	      SELECT resthash.restaurant_id
+          FROM Nb60344_Restaurant_Hashtag resthash
+              ,NB60344_hashtag htag
+          WHERE resthash.hash_id = htag.hash_id
+          AND htag.hash_name LIKE '%' || #{search} || '%'
+	</select>
+	
+	<select id="searchRestIdForMenu" resultType="Map" parameterType="Map" timeout="10">
+		SELECT menu.restaurant_id
+		FROM NB60344_menu menu
+		WHERE menu.menu_name LIKE '%' || #{search} || '%'
+	</select>
+	
+	<select id="searchRestIdForRestNm" resultType="Map" parameterType="Map" timeout="10">
+		SELECT rest.restaurant_id
+		FROM NB60344_restaurant rest
+		WHERE rest.restaurant_name LIKE '%' || #{search} || '%'
+	</select>
+	
+	<select id="searchRestIdForCate" resultType="Map" parameterType="Map" timeout="10">
+		SELECT rest.restaurant_id
+		FROM NB60344_restaurant rest
+		WHERE rest.category_id = #{search}
+		
+	</select>
+	
+</mapper>
